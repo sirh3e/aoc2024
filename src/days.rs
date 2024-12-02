@@ -3,7 +3,6 @@ use crate::{
     Day, DayResult, ResultValue,
 };
 use std::collections::HashMap;
-use std::iter::zip;
 
 pub struct Day01;
 impl Day for Day01 {
@@ -47,7 +46,61 @@ impl Day for Day01 {
     }
 }
 
+#[derive(Eq, PartialEq, Copy, Clone, Debug)]
+enum Direction {
+    Up(u32),
+    Down(u32),
+}
+
+#[derive(Eq, PartialEq, Copy, Clone)]
+enum State {
+    Valid,
+    Invalid,
+}
+
 pub struct Day02;
+
+
+impl Day02 {
+    fn count(line: &Vec<u32>) -> usize {
+        fn get_direction(a: u32, b: u32) -> Direction {
+            let diff = a.abs_diff(b);
+            match a < b {
+                true => Direction::Up(diff),
+                false => Direction::Down(diff),
+            }
+        }
+
+        fn is_in_range(a: u32) -> bool {
+            a >= 1 && a <= 3
+        }
+
+        let directions = line
+            .iter()
+            .zip(line.iter().skip(1))
+            .map(|(a, b)| get_direction(*a, *b))
+            .collect::<Vec<_>>();
+
+        directions
+            .iter()
+            .zip(directions.iter().skip(1))
+            .inspect(|(a, b)| println!("{:?} {:?}", a, b))
+            .map(|(a, b)| match (a, b) {
+                (Direction::Up(num1), Direction::Up(num2))
+                | (Direction::Down(num1), Direction::Down(num2)) => {
+                    is_in_range(*num1) && is_in_range(*num2)
+                }
+                _ => false,
+            })
+            .map(|b| match b {
+                true => State::Valid,
+                false => State::Invalid,
+            })
+            .filter(|state| *state == State::Invalid)
+            .count()
+    }
+}
+
 
 impl Day for Day02 {
     fn day(&self) -> u32 {
@@ -55,78 +108,22 @@ impl Day for Day02 {
     }
 
     fn part1(&self) -> DayResult {
-        #[derive(Eq, PartialEq, Copy, Clone, Debug)]
-        enum Direction {
-            Up(u32),
-            Down(u32),
-        }
-
-        #[derive(Eq, PartialEq, Copy, Clone)]
-        enum State {
-            Valid,
-            Invalid,
-        }
-
-        fn valid(line: &Vec<u32>) -> bool {
-            fn get_direction(a: u32, b: u32) -> Direction {
-                let diff = a.abs_diff(b);
-                match a < b {
-                    true => Direction::Up(diff),
-                    false => Direction::Down(diff),
-                }
-            }
-
-            fn get_state(a: &Direction, b: &Direction) -> State {
-                match (a, b) {
-                    (Direction::Up(num1), Direction::Up(num2))
-                    | (Direction::Down(num1), Direction::Down(num2)) => {
-                        let diff = num1.abs_diff(*num2);
-                        match diff >= 1 && diff <= 3 {
-                            true => State::Valid,
-                            false => State::Invalid,
-                        }
-                    }
-                    _ => State::Invalid,
-                }
-            }
-
-            fn is_in_range(a: u32) -> bool {
-                a >= 1 && a <= 3
-            }
-
-            let directions = line
-                .iter()
-                .zip(line.iter().skip(1))
-                .map(|(a, b)| get_direction(*a, *b))
-                .collect::<Vec<_>>();
-
-            let result = directions
-                .iter()
-                .zip(directions.iter().skip(1))
-                .map(|(a, b)| match (a, b) {
-                    (Direction::Up(num1), Direction::Up(num2))
-                    | (Direction::Down(num1), Direction::Down(num2)) => {
-                        is_in_range(*num1) && is_in_range(*num2)
-                    }
-                    _ => false,
-                })
-                .map(|b| match b {
-                    true => State::Valid,
-                    false => State::Invalid,
-                })
-                .filter(|state| *state == State::Invalid)
-                .count()
-                == 0;
-            result
-        }
-
         let lines = day2_parse("data/day02_part1.txt")?;
-        let result = lines.iter().filter(|line| valid(line)).count();
+        let result = lines.iter().filter(|line| Self::count(line) == 0).count();
 
         Ok(ResultValue::from(result.to_string()))
     }
 
     fn part2(&self) -> DayResult {
-        Ok(ResultValue::from("Day 2 Part 2".to_string()))
+        let lines = day2_parse("data/day02_part1_test.txt")?;
+        let result = lines
+            .iter()
+            .inspect(|line| println!("{:?}", line))
+            .map(|line| Self::count(line))
+            .inspect(|count| println!("{}", count))
+            .filter(|line| *line < 2)
+            .count();
+
+        Ok(ResultValue::from(result.to_string()))
     }
 }
