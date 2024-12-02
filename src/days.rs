@@ -1,5 +1,7 @@
-use crate::parse::day01_parse;
-use crate::{Day, DayResult, ResultValue};
+use crate::{
+    parse::{day01_parse, day2_parse},
+    Day, DayResult, ResultValue,
+};
 use std::collections::HashMap;
 
 pub struct Day01;
@@ -41,5 +43,61 @@ impl Day for Day01 {
             .sum();
 
         Ok(ResultValue::from(format!("{}", result).to_string()))
+    }
+}
+
+pub struct Day02;
+
+impl Day for Day02 {
+    fn day(&self) -> u32 {
+        2
+    }
+
+    fn part1(&self) -> DayResult {
+        #[derive(Eq, PartialEq, Copy, Clone)]
+        enum Direction {
+            Up,
+            Down,
+            Invalid,
+            Unutilized,
+        }
+
+        fn valid(line: &Vec<u32>) -> bool {
+            fn get_direction(a: u32, b: u32) -> Direction {
+                match a < b {
+                    true => Direction::Up,
+                    false => Direction::Down,
+                }
+            }
+
+            let (direction, _) = line.iter().skip(1).fold(
+                (Direction::Unutilized, line[0]),
+                |(direction, old), new| {
+                    let new_direction = get_direction(*new, old);
+                    let diff = new.abs_diff(old);
+
+                    match (
+                        direction,
+                        direction == new_direction,
+                        diff >= 1 && diff <= 3,
+                    ) {
+                        (Direction::Unutilized, _, true) => (new_direction, *new),
+                        (_, true, true) => (new_direction, *new),
+                        _ => return (Direction::Invalid, 0),
+                    }
+                },
+            );
+
+            !(Direction::Invalid == direction)
+        }
+
+        let lines = day2_parse("data/day02_part1.txt")?;
+        let result = lines.iter().filter(|line| valid(line)).count();
+
+        Ok(ResultValue::from(result.to_string()))
+    }
+
+    fn part2(&self) -> DayResult {
+        Ok(ResultValue::from("Day 2 Part 2".to_string()))
     }
 }
