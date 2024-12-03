@@ -1,4 +1,4 @@
-use aoc2024::days::{Day01, Day02};
+use aoc2024::days::Day02;
 use aoc2024::Day;
 
 fn main() -> aoc2024::Result<()> {

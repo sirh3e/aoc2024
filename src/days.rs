@@ -60,7 +60,6 @@ enum State {
 
 pub struct Day02;
 
-
 impl Day02 {
     fn count(line: &Vec<u32>) -> usize {
         fn get_direction(a: u32, b: u32) -> Direction {
@@ -72,7 +71,7 @@ impl Day02 {
         }
 
         fn is_in_range(a: u32) -> bool {
-            a >= 1 && a <= 3
+            (1..=3).contains(&a)
         }
 
         let directions = line
@@ -101,7 +100,6 @@ impl Day02 {
     }
 }
 
-
 impl Day for Day02 {
     fn day(&self) -> u32 {
         2
@@ -115,13 +113,24 @@ impl Day for Day02 {
     }
 
     fn part2(&self) -> DayResult {
-        let lines = day2_parse("data/day02_part1_test.txt")?;
+        let lines = day2_parse("data/day02_part1.txt")?;
         let result = lines
             .iter()
-            .inspect(|line| println!("{:?}", line))
-            .map(|line| Self::count(line))
-            .inspect(|count| println!("{}", count))
-            .filter(|line| *line < 2)
+            .filter_map(|line| {
+                if Self::count(line) == 0 {
+                    return Some(true);
+                }
+
+                for idx in 0..line.len() {
+                    let mut part = line.clone();
+                    part.remove(idx);
+
+                    if Self::count(&part) == 0 {
+                        return Some(true);
+                    }
+                }
+                None
+            })
             .count();
 
         Ok(ResultValue::from(result.to_string()))
