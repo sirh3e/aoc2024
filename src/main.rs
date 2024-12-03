@@ -1,9 +1,13 @@
-use aoc2024::days::Day02;
-use aoc2024::Day;
+use aoc2024::{
+    days::{day01::Day01, day02::Day02},
+    Day, Result,
+};
 
-fn main() -> aoc2024::Result<()> {
-    //let days = vec![Box::new(Day01) as Box<dyn Day>];
-    let days = vec![Box::new(Day02) as Box<dyn Day>];
+fn main() -> Result<()> {
+    let days = vec![
+        Box::new(Day01) as Box<dyn Day>,
+        Box::new(Day02) as Box<dyn Day>,
+    ];
     for day in days {
         println!("{:?}", day.output()?);
     }
